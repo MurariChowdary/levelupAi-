@@ -1,8 +1,109 @@
 import React, { useState, useRef } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Canvas } from '@react-three/fiber';
-import { OrbitControls } from '@react-three/drei';
+import { Canvas, useFrame } from '@react-three/fiber';
+import { OrbitControls, Float, Text, Box, Sphere } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import * as THREE from 'three';
+
+// 3D Exercise demonstration model
+const ExerciseDemo = ({ exerciseName }) => {
+  const groupRef = useRef();
+  
+  useFrame((state) => {
+    if (groupRef.current) {
+      // Simulate exercise movement
+      const time = state.clock.elapsedTime;
+      
+      switch (exerciseName) {
+        case 'Barbell Squat':
+          groupRef.current.position.y = Math.sin(time * 2) * 0.3;
+          break;
+        case 'Bench Press':
+          groupRef.current.position.z = Math.sin(time * 1.5) * 0.2;
+          break;
+        case 'Deadlift':
+          groupRef.current.rotation.x = Math.sin(time * 1.8) * 0.2;
+          break;
+        case 'Overhead Press':
+          groupRef.current.position.y = Math.sin(time * 2.2) * 0.4 + 0.2;
+          break;
+        default:
+          groupRef.current.rotation.y = time * 0.5;
+      }
+    }
+  });
+  
+  return (
+    <Float speed={1} rotationIntensity={0.1} floatIntensity={0.1}>
+      <group ref={groupRef}>
+        {/* Exercise equipment representation */}
+        <Box args={[2, 0.2, 0.2]} position={[0, 1, 0]}>
+          <meshStandardMaterial
+            color="#8a2be2"
+            metalness={0.8}
+            roughness={0.2}
+            emissive="#8a2be2"
+            emissiveIntensity={0.3}
+          />
+        </Box>
+        
+        {/* Weight plates */}
+        <Sphere args={[0.3]} position={[-0.8, 1, 0]}>
+          <meshStandardMaterial
+            color="#e86af0"
+            metalness={0.9}
+            roughness={0.1}
+            emissive="#e86af0"
+            emissiveIntensity={0.2}
+          />
+        </Sphere>
+        <Sphere args={[0.3]} position={[0.8, 1, 0]}>
+          <meshStandardMaterial
+            color="#e86af0"
+            metalness={0.9}
+            roughness={0.1}
+            emissive="#e86af0"
+            emissiveIntensity={0.2}
+          />
+        </Sphere>
+        
+        {/* Exercise name */}
+        <Text
+          position={[0, 2, 0]}
+          fontSize={0.3}
+          color="white"
+          anchorX="center"
+          anchorY="middle"
+        >
+          {exerciseName}
+        </Text>
+        
+        {/* Movement indicators */}
+        {[...Array(8)].map((_, i) => {
+          const angle = (i / 8) * Math.PI * 2;
+          return (
+            <Sphere
+              key={i}
+              args={[0.05]}
+              position={[
+                Math.cos(angle) * 1.5,
+                Math.sin(angle) * 1.5,
+                0
+              ]}
+            >
+              <meshStandardMaterial
+                color="#7bb3ff"
+                emissive="#7bb3ff"
+                emissiveIntensity={1}
+              />
+            </Sphere>
+          );
+        })}
+      </group>
+    </Float>
+  );
+};
 
 const FormGuideViewer = () => {
   const [selectedExercise, setSelectedExercise] = useState(null);
@@ -164,18 +265,25 @@ const FormGuideViewer = () => {
               
               {viewMode === '3d' ? (
                 <ModelContainer>
-                  <Canvas ref={canvasRef} camera={{ position: [0, 0, 5], fov: 45 }}>
-                    <ambientLight intensity={0.5} />
-                    <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} />
-                    <pointLight position={[-10, -10, -10]} />
+                  <Canvas ref={canvasRef} camera={{ position: [0, 0, 8], fov: 45 }}>
+                    <ambientLight intensity={0.4} />
+                    <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} color="#8a2be2" />
+                    <pointLight position={[-10, -10, -10]} intensity={0.5} color="#7bb3ff" />
+                    <pointLight position={[0, 10, 0]} intensity={0.3} color="#e86af0" />
                     
-                    {/* Placeholder for 3D model */}
-                    <mesh>
-                      <boxGeometry args={[1, 1, 1]} />
-                      <meshStandardMaterial color="var(--accent-purple)" />
-                    </mesh>
+                    <ExerciseDemo exerciseName={selectedExercise.name} />
                     
-                    <OrbitControls enablePan={true} enableZoom={true} enableRotate={true} />
+                    <OrbitControls 
+                      enablePan={true} 
+                      enableZoom={true} 
+                      enableRotate={true}
+                      autoRotate
+                      autoRotateSpeed={0.3}
+                    />
+                    
+                    <EffectComposer>
+                      <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} height={300} />
+                    </EffectComposer>
                   </Canvas>
                   
                   <ModelControls>
@@ -363,6 +471,7 @@ const ModelContainer = styled.div`
   background-color: var(--secondary-dark);
   border-radius: 8px;
   overflow: hidden;
+  background: radial-gradient(circle at center, rgba(138, 43, 226, 0.1), rgba(55, 56, 84, 0.9));
   
   canvas {
     flex: 1;

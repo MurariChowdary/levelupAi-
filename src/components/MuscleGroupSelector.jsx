@@ -1,8 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, PerspectiveCamera } from '@react-three/drei';
+import { Canvas, useFrame, useThree } from '@react-three/fiber';
+import { OrbitControls, PerspectiveCamera, Float, Text, Sphere } from '@react-three/drei';
+import { EffectComposer, Bloom } from '@react-three/postprocessing';
+import * as THREE from 'three';
 
 const MuscleGroupSelector = () => {
   const [selectedMuscle, setSelectedMuscle] = useState(null);
@@ -54,11 +56,12 @@ const MuscleGroupSelector = () => {
       
       <ContentContainer>
         <ModelContainer>
-          <Canvas>
+          <Canvas camera={{ position: [0, 0, 5], fov: 45 }}>
             <PerspectiveCamera makeDefault position={[0, 0, 3]} />
-            <ambientLight intensity={0.5} />
-            <pointLight position={[10, 10, 10]} intensity={1} />
-            <HumanModel 
+            <ambientLight intensity={0.4} />
+            <spotLight position={[10, 10, 10]} angle={0.15} penumbra={1} intensity={1} color="#8a2be2" />
+            <pointLight position={[-10, -10, -10]} intensity={0.5} color="#7bb3ff" />
+            <pointLight position={[0, 10, 0]} intensity={0.3} color="#e86af0" />
               muscleGroups={muscleGroups} 
               selectedMuscle={selectedMuscle}
               hoveredMuscle={hoveredMuscle}
@@ -66,7 +69,17 @@ const MuscleGroupSelector = () => {
               onSelectMuscle={handleMuscleSelect}
             />
             <OrbitControls enableZoom={false} enablePan={false} />
-          </Canvas>
+            <OrbitControls 
+              enablePan={true} 
+              enableZoom={true} 
+              enableRotate={true}
+              autoRotate
+              autoRotateSpeed={0.5}
+            />
+            
+            <EffectComposer>
+              <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} height={300} />
+            </EffectComposer>
         </ModelContainer>
         
         <InfoPanel>
@@ -145,57 +158,114 @@ const HumanModel = ({ muscleGroups, selectedMuscle, hoveredMuscle, setHoveredMus
   
   return (
     <group ref={groupRef}>
-      {/* Basic human figure - simplified for this example */}
-      <mesh position={[0, 0, 0]} scale={[0.4, 1, 0.2]}>
-        <capsuleGeometry args={[0.5, 1, 16, 16]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-      
-      {/* Head */}
-      <mesh position={[0, 1.3, 0]}>
-        <sphereGeometry args={[0.25, 32, 32]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-      
-      {/* Arms */}
-      <mesh position={[0.7, 0.3, 0]} rotation={[0, 0, -Math.PI / 6]} scale={[0.15, 0.6, 0.15]}>
-        <capsuleGeometry args={[0.5, 1, 16, 16]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-      <mesh position={[-0.7, 0.3, 0]} rotation={[0, 0, Math.PI / 6]} scale={[0.15, 0.6, 0.15]}>
-        <capsuleGeometry args={[0.5, 1, 16, 16]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-      
-      {/* Legs */}
-      <mesh position={[0.25, -1, 0]} rotation={[0.1, 0, 0]} scale={[0.15, 0.6, 0.15]}>
-        <capsuleGeometry args={[0.5, 1, 16, 16]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-      <mesh position={[-0.25, -1, 0]} rotation={[0.1, 0, 0]} scale={[0.15, 0.6, 0.15]}>
-        <capsuleGeometry args={[0.5, 1, 16, 16]} />
-        <meshStandardMaterial color="#333" />
-      </mesh>
-      
-      {/* Muscle group indicators */}
-      {muscleGroups.map((muscle) => (
-        <mesh
-          key={muscle.id}
-          position={muscle.position}
-          onClick={() => onSelectMuscle(muscle)}
-          onPointerOver={() => setHoveredMuscle(muscle.id)}
-          onPointerOut={() => setHoveredMuscle(null)}
-        >
-          <sphereGeometry args={[0.15, 32, 32]} />
+      <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.1}>
+        {/* Enhanced human figure */}
+        <mesh position={[0, 0, 0]} scale={[0.4, 1, 0.2]}>
+          <capsuleGeometry args={[0.5, 1, 16, 16]} />
           <meshStandardMaterial 
-            color={muscle.color} 
-            emissive={muscle.color}
-            emissiveIntensity={selectedMuscle === muscle.id ? 0.5 : hoveredMuscle === muscle.id ? 0.3 : 0}
-            transparent
-            opacity={selectedMuscle === muscle.id ? 1 : 0.7}
+            color="#2a2a3a" 
+            metalness={0.3}
+            roughness={0.7}
+            emissive="#1a1a2e"
+            emissiveIntensity={0.1}
           />
         </mesh>
-      ))}
+        
+        {/* Head */}
+        <mesh position={[0, 1.3, 0]}>
+          <sphereGeometry args={[0.25, 32, 32]} />
+          <meshStandardMaterial 
+            color="#2a2a3a" 
+            metalness={0.2}
+            roughness={0.8}
+          />
+        </mesh>
+        
+        {/* Arms */}
+        <mesh position={[0.7, 0.3, 0]} rotation={[0, 0, -Math.PI / 6]} scale={[0.15, 0.6, 0.15]}>
+          <capsuleGeometry args={[0.5, 1, 16, 16]} />
+          <meshStandardMaterial 
+            color="#2a2a3a" 
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        <mesh position={[-0.7, 0.3, 0]} rotation={[0, 0, Math.PI / 6]} scale={[0.15, 0.6, 0.15]}>
+          <capsuleGeometry args={[0.5, 1, 16, 16]} />
+          <meshStandardMaterial 
+            color="#2a2a3a" 
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        
+        {/* Legs */}
+        <mesh position={[0.25, -1, 0]} rotation={[0.1, 0, 0]} scale={[0.15, 0.6, 0.15]}>
+          <capsuleGeometry args={[0.5, 1, 16, 16]} />
+          <meshStandardMaterial 
+            color="#2a2a3a" 
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        <mesh position={[-0.25, -1, 0]} rotation={[0.1, 0, 0]} scale={[0.15, 0.6, 0.15]}>
+          <capsuleGeometry args={[0.5, 1, 16, 16]} />
+          <meshStandardMaterial 
+            color="#2a2a3a" 
+            metalness={0.3}
+            roughness={0.7}
+          />
+        </mesh>
+        
+        {/* Enhanced muscle group indicators */}
+        {muscleGroups.map((muscle) => (
+          <Float key={muscle.id} speed={2} rotationIntensity={0.2} floatIntensity={0.1}>
+            <mesh
+              position={muscle.position}
+              onClick={() => onSelectMuscle(muscle)}
+              onPointerOver={() => setHoveredMuscle(muscle.id)}
+              onPointerOut={() => setHoveredMuscle(null)}
+            >
+              <sphereGeometry args={[0.15, 32, 32]} />
+              <meshStandardMaterial 
+                color={muscle.color} 
+                emissive={muscle.color}
+                emissiveIntensity={selectedMuscle === muscle.id ? 0.8 : hoveredMuscle === muscle.id ? 0.5 : 0.2}
+                transparent
+                opacity={selectedMuscle === muscle.id ? 1 : 0.7}
+                metalness={0.8}
+                roughness={0.2}
+              />
+            </mesh>
+            
+            {/* Muscle group label */}
+            {(selectedMuscle === muscle.id || hoveredMuscle === muscle.id) && (
+              <Text
+                position={[muscle.position[0], muscle.position[1] + 0.5, muscle.position[2]]}
+                fontSize={0.15}
+                color="white"
+                anchorX="center"
+                anchorY="middle"
+              >
+                {muscle.name}
+              </Text>
+            )}
+            
+            {/* Glow effect for selected/hovered */}
+            {(selectedMuscle === muscle.id || hoveredMuscle === muscle.id) && (
+              <Sphere args={[0.2]} position={muscle.position}>
+                <meshStandardMaterial
+                  color={muscle.color}
+                  transparent
+                  opacity={0.3}
+                  emissive={muscle.color}
+                  emissiveIntensity={1}
+                />
+              </Sphere>
+            )}
+          </Float>
+        ))}
+      </Float>
     </group>
   );
 };
@@ -241,6 +311,7 @@ const ModelContainer = styled.div`
   border-radius: 10px;
   overflow: hidden;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  background: radial-gradient(circle at center, rgba(138, 43, 226, 0.1), rgba(55, 56, 84, 0.9));
 `;
 
 const InfoPanel = styled.div`

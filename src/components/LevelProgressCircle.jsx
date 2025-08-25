@@ -2,6 +2,7 @@ import React, { useEffect, useRef } from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
 import { useUserLevel } from '../context/UserLevelContext';
+import LevelOrb3D from './3DLevelOrb';
 
 const LevelProgressCircle = () => {
   const { 
@@ -23,6 +24,10 @@ const LevelProgressCircle = () => {
   
   return (
     <CircleContainer>
+      <Orb3DContainer>
+        <LevelOrb3D />
+      </Orb3DContainer>
+      
       <svg width="120" height="120" viewBox="0 0 120 120">
         {/* Background circle */}
         <circle
@@ -112,7 +117,19 @@ const CircleContainer = styled.div`
   
   svg {
     filter: drop-shadow(0 0 10px rgba(0, 0, 0, 0.3));
+    position: relative;
+    z-index: 2;
   }
+`;
+
+const Orb3DContainer = styled.div`
+  position: absolute;
+  top: -90px;
+  left: -90px;
+  width: 300px;
+  height: 300px;
+  z-index: 1;
+  opacity: 0.8;
 `;
 
 const CircleContent = styled.div`
@@ -125,6 +142,7 @@ const CircleContent = styled.div`
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  z-index: 3;
 `;
 
 const LevelDisplay = styled.div`

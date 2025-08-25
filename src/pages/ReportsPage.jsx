@@ -5,6 +5,8 @@ import WorkoutStatsChart from '../components/WorkoutStatsChart';
 import NutritionStatsChart from '../components/NutritionStatsChart';
 import ProgressOverview from '../components/ProgressOverview';
 import AchievementsList from '../components/AchievementsList';
+import ProgressTunnel3D from '../components/3DProgressTunnel';
+import StatsGlobe3D from '../components/3DStatsGlobe';
 
 const ReportsPage = () => {
   const [activeTab, setActiveTab] = useState('overview');
@@ -21,15 +23,51 @@ const ReportsPage = () => {
   const renderTabContent = () => {
     switch (activeTab) {
       case 'overview':
-        return <ProgressOverview />;
+        return (
+          <>
+            <ProgressTunnel3D progress={78} title="Overall Fitness Progress" />
+            <ProgressOverview />
+          </>
+        );
       case 'workouts':
-        return <WorkoutStatsChart />;
+        return (
+          <>
+            <StatsGlobe3D 
+              stats={[
+                { label: 'Workouts', value: '156', color: '#8a2be2', position: [0, 2, 0] },
+                { label: 'Sets', value: '2.1k', color: '#e86af0', position: [1.5, 1, 1] },
+                { label: 'Reps', value: '18k', color: '#7bb3ff', position: [-1.5, 1, -1] },
+                { label: 'Weight', value: '45t', color: '#00d084', position: [0, -1.5, 1.5] }
+              ]}
+              title="Workout Statistics"
+            />
+            <WorkoutStatsChart />
+          </>
+        );
       case 'nutrition':
-        return <NutritionStatsChart />;
+        return (
+          <>
+            <StatsGlobe3D 
+              stats={[
+                { label: 'Calories', value: '2.1k', color: '#e86af0', position: [0, 2, 0] },
+                { label: 'Protein', value: '180g', color: '#7bb3ff', position: [1.5, 1, 1] },
+                { label: 'Carbs', value: '250g', color: '#8a2be2', position: [-1.5, 1, -1] },
+                { label: 'Fat', value: '80g', color: '#ffc107', position: [0, -1.5, 1.5] }
+              ]}
+              title="Nutrition Overview"
+            />
+            <NutritionStatsChart />
+          </>
+        );
       case 'achievements':
         return <AchievementsList />;
       default:
-        return <ProgressOverview />;
+        return (
+          <>
+            <ProgressTunnel3D progress={78} title="Overall Fitness Progress" />
+            <ProgressOverview />
+          </>
+        );
     }
   };
   

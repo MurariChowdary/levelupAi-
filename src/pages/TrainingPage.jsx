@@ -7,6 +7,8 @@ import ExerciseLogger from '../components/ExerciseLogger';
 import MuscleGroupSelector from '../components/MuscleGroupSelector';
 import WorkoutTimer from '../components/WorkoutTimer';
 import CustomWorkoutBuilder from '../components/CustomWorkoutBuilder';
+import WorkoutVisualizer3D from '../components/3DWorkoutVisualizer';
+import ProgressTunnel3D from '../components/3DProgressTunnel';
 
 const TrainingPage = () => {
   const [activeTab, setActiveTab] = useState('today');
@@ -49,6 +51,15 @@ const TrainingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
+            <WorkoutVisualizer3D 
+              workouts={[
+                { id: 1, name: 'Bench Press', type: 'strength', completed: true },
+                { id: 2, name: 'Squats', type: 'strength', completed: true },
+                { id: 3, name: 'Pull-ups', type: 'strength', completed: false },
+                { id: 4, name: 'Deadlift', type: 'strength', completed: false }
+              ]}
+              progress={65}
+            />
             <TodaysWorkout />
             <WorkoutTimer />
           </TabContent>
@@ -61,6 +72,7 @@ const TrainingPage = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3 }}
           >
+            <ProgressTunnel3D progress={75} title="Weekly Progress" />
             <WorkoutPlanCalendar />
           </TabContent>
         )}

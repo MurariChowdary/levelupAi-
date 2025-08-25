@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Routes, Route, NavLink, useLocation } from 'react-router-dom';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import Interactive3DBackground from './components/Interactive3DBackground';
 
 // Pages
 import HomePage from './pages/HomePage';
@@ -20,6 +21,7 @@ const App = () => {
   return (
     <UserLevelProvider>
       <AppContainer>
+        <Interactive3DBackground intensity="medium" />
         <MainContent>
           <Routes>
             <Route path="/" element={<HomePage />} />

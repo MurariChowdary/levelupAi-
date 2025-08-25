@@ -1,6 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
-import { OrbitControls, useGLTF, PerspectiveCamera, useAnimations, Stars } from '@react-three/drei';
+import { OrbitControls, useGLTF, PerspectiveCamera, useAnimations, Stars, Float, Text } from '@react-three/drei';
+import { EffectComposer, Bloom, ChromaticAberration } from '@react-three/postprocessing';
 import { useUserLevel } from '../context/UserLevelContext';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
@@ -55,7 +56,20 @@ const Character = ({ level }) => {
   
   // Enhanced character model with more details and animations
   return (
-    <group ref={group} position={[0, -1, 0]} scale={[getCharacterScale(), getCharacterScale(), getCharacterScale()]}>
+    <Float speed={0.5} rotationIntensity={0.1} floatIntensity={0.2}>
+      <group ref={group} position={[0, -1, 0]} scale={[getCharacterScale(), getCharacterScale(), getCharacterScale()]}>
+        {/* Power level indicator */}
+        <Text
+          position={[0, 2.5, 0]}
+          fontSize={0.3}
+          color="#8a2be2"
+          anchorX="center"
+          anchorY="middle"
+          font="/fonts/Poppins-Bold.woff"
+        >
+          POWER LEVEL: {Math.floor(userLevel * 1000)}
+        </Text>
+        
       {/* Body - Sung Jin-Woo's sleek hunter outfit */}
       <mesh castShadow>
         <cylinderGeometry args={[0.35, 0.5, 1.8, 8]} />
@@ -463,7 +477,8 @@ const Character = ({ level }) => {
           ))}
         </group>
       )}
-    </group>
+      </group>
+    </Float>
   );
 };
 
@@ -531,6 +546,14 @@ const Scene = () => {
         autoRotate={rank === 'LEGENDARY'} 
         autoRotateSpeed={1} 
       />
+      
+      {/* Post-processing effects */}
+      <EffectComposer>
+        <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.9} height={300} />
+        {rank === 'SHADOW_MONARCH' && (
+          <ChromaticAberration offset={[0.002, 0.002]} />
+        )}
+      </EffectComposer>
     </>
   );
 };

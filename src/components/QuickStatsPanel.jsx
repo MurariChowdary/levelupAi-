@@ -1,6 +1,8 @@
 import React from 'react';
 import styled from 'styled-components';
 import { motion } from 'framer-motion';
+import Card3D from './3DCard';
+import StatsGlobe3D from './3DStatsGlobe';
 
 const QuickStatsPanel = () => {
   // Mock data for demonstration
@@ -85,21 +87,36 @@ const QuickStatsPanel = () => {
         <DateDisplay>{new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'short', day: 'numeric' })}</DateDisplay>
       </StatsHeader>
       
+      <Globe3DContainer>
+        <StatsGlobe3D 
+          stats={statItems.map(item => ({
+            label: item.label,
+            value: item.value,
+            color: item.color,
+            position: [
+              (Math.random() - 0.5) * 4,
+              (Math.random() - 0.5) * 4,
+              (Math.random() - 0.5) * 4
+            ]
+          }))}
+          title="Today's Stats"
+        />
+      </Globe3DContainer>
+      
       <StatsGrid>
         {statItems.map((stat, index) => (
-          <StatItem 
+          <Card3D
             key={index}
-            as={motion.div}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: index * 0.1, duration: 0.3 }}
+            title={stat.label}
+            value={stat.value}
+            color={stat.color}
           >
-            <StatIcon color={stat.color}>
-              {stat.icon}
-            </StatIcon>
-            <StatValue>{stat.value}</StatValue>
-            <StatLabel>{stat.label}</StatLabel>
-          </StatItem>
+            <StatOverlay>
+              <StatIcon color={stat.color}>
+                {stat.icon}
+              </StatIcon>
+            </StatOverlay>
+          </Card3D>
         ))}
       </StatsGrid>
     </StatsContainer>
@@ -132,6 +149,10 @@ const DateDisplay = styled.div`
   font-size: 0.875rem;
 `;
 
+const Globe3DContainer = styled.div`
+  margin-bottom: 2rem;
+`;
+
 const StatsGrid = styled.div`
   display: grid;
   grid-template-columns: repeat(3, 1fr);
@@ -146,46 +167,24 @@ const StatsGrid = styled.div`
   }
 `;
 
-const StatItem = styled.div`
-  background-color: var(--primary-dark);
-  border-radius: 10px;
-  padding: 1rem;
+const StatOverlay = styled.div`
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-  
-  &:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-  }
+  height: 100%;
 `;
 
 const StatIcon = styled.div`
-  width: 40px;
-  height: 40px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   background-color: ${props => props.color || 'var(--accent-purple)'};
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.75rem;
   box-shadow: 0 0 10px ${props => props.color || 'var(--accent-purple)'};
-`;
-
-const StatValue = styled.div`
   font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--text-light);
-  margin-bottom: 0.25rem;
-`;
-
-const StatLabel = styled.div`
-  font-size: 0.875rem;
-  color: var(--text-secondary);
 `;
 
 export default QuickStatsPanel;
